@@ -1,0 +1,7 @@
+# Sample API response (new schema)
+{
+  "items": [
+    { "name": "Hazel" },
+    { "name": "Alex" }
+  ]
+}

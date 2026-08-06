@@ -1,0 +1,13 @@
+node_modules/
+cdk.out/
+dist/
+*.js
+!cdk.json
+__pycache__/
+*.pyc
+.Python
+.env
+.splice/
+demo-output.json
+.DS_Store
+docs/

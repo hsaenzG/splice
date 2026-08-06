@@ -1,0 +1,6 @@
+TypeError: Cannot read property 'map' of undefined
+    at UserList (demo-app/UserList.tsx:5:13)
+    at renderWithHooks (react-dom.development.js:16305:18)
+
+Context: API response shape changed from User[] to { items: User[] }.
+Repro: load page after deploy, users list crashes.

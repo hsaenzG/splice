@@ -1,0 +1,29 @@
+---
+description: Splice — shared context layer for Kiro, Cursor, and Claude Code
+alwaysApply: true
+---
+
+# Splice (Cursor)
+
+This project uses **Splice** — a meta-tooling layer that shares orchestrated context between Kiro, Cursor, and Claude Code.
+
+## On every turn
+
+1. If `.splice/active-bundle.md` exists, **read it first** — it is filtered and prioritized.
+2. Do not re-paste errors or files already in the bundle.
+3. Follow `recommendedAgent` and `workflow` from the bundle.
+
+## Trigger
+
+User types `/harness` or `@harness` to refresh the bundle before you respond.
+
+## Handoff
+
+If `assistantsUsed` includes another IDE (Kiro, Claude Code), continue the task using the bundle — do not re-triage from scratch.
+
+## Capture errors (optional)
+
+```bash
+npm test 2>&1 | python3 scripts/splice-cli.py capture-error
+# then in chat: /harness fix the failing test
+```

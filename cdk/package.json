@@ -1,0 +1,22 @@
+{
+  "name": "splice-cdk",
+  "version": "0.1.0",
+  "bin": {
+    "splice": "bin/app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "cdk": "cdk",
+    "deploy": "cdk deploy --require-approval never",
+    "synth": "cdk synth"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "aws-cdk": "^2.170.0",
+    "aws-cdk-lib": "^2.170.0",
+    "constructs": "^10.4.2",
+    "source-map-support": "^0.5.21",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

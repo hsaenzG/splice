@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash integrations/hooks/claude-session-init.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash integrations/hooks/claude-orchestrate.sh",
+            "timeout": 90
+          }
+        ]
+      }
+    ]
+  }
+}
