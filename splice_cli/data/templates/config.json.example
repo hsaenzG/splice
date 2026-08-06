@@ -1,0 +1,18 @@
+{
+  "project": null,
+  "orchestrator": "mock",
+  "captureGitDiff": true,
+  "gitDiffMaxChars": 4000,
+  "includePaths": [],
+  "errorSources": [".splice/last-error.log"],
+  "extraFiles": [],
+  "promptPathPatterns": true,
+  "ollama": {
+    "baseUrl": "http://localhost:11434",
+    "model": "llama3.2",
+    "timeoutSeconds": 60
+  },
+  "bedrock": {
+    "modelId": "amazon.nova-lite-v1:0"
+  }
+}

@@ -2,6 +2,7 @@
 
 **Share orchestrated context between Kiro, Cursor, and Claude Code — one layer above the assistant.**
 
+[![PyPI](https://img.shields.io/pypi/v/splice-cli)](https://pypi.org/project/splice-cli/)
 [![GitHub](https://img.shields.io/github/stars/hsaenzG/splice?style=social)](https://github.com/hsaenzG/splice)
 
 Splice is a thin meta-tooling layer for **any codebase**. It ingests errors, diffs, and files once, routes to the right agent profile (debugger, architect, implementer), and hands off a reduced context bundle between IDEs via a shared session in your repo.
@@ -9,7 +10,27 @@ Splice is a thin meta-tooling layer for **any codebase**. It ingests errors, dif
 **Three orchestration modes:** mock (offline) · **Ollama (local, privacy-first)** · Bedrock (cloud).  
 No AWS required for IDE hooks.
 
-**Repo:** https://github.com/hsaenzG/splice
+---
+
+## Install
+
+```bash
+pip install splice-cli
+```
+
+Then set up your project:
+
+```bash
+cd your-project
+splice setup        # detects installed IDEs and copies hooks automatically
+splice doctor       # verify config
+```
+
+Restart **Kiro**, **Cursor**, and/or **Claude Code**, then:
+
+```
+/harness debug the failing test in src/auth.ts
+```
 
 ---
 
@@ -32,31 +53,12 @@ Splice fixes that with a single trigger: **`/harness`**
 
 ---
 
-## Quick start
-
-### Clone and try
-
-```bash
-git clone https://github.com/hsaenzG/splice.git
-cd splice
-
-python3 scripts/demo-dual-ide.py   # simulate Kiro → Cursor handoff
-```
-
-### Install in any project
+## Quick start (without pip)
 
 ```bash
 git clone https://github.com/hsaenzG/splice.git /tmp/splice
 bash /tmp/splice/scripts/install-splice.sh /path/to/your-repo
 ```
-
-Restart **Kiro**, **Cursor**, and/or **Claude Code**, then:
-
-```
-/harness debug the failing test in src/auth.ts
-```
-
-Guides: **[INSTALL.md](INSTALL.md)** · **[ORCHESTRATORS.md](ORCHESTRATORS.md)**
 
 ---
 
@@ -77,7 +79,7 @@ Edit `.splice/config.json`:
 ```
 
 ```bash
-python3 scripts/splice-cli.py doctor
+splice doctor
 /harness debug my issue        # in Kiro, Cursor, or Claude Code
 ```
 
@@ -95,7 +97,7 @@ python3 scripts/splice-cli.py doctor
 
 ```bash
 # 1. Capture test/build output (optional)
-npm test 2>&1 | python3 scripts/splice-cli.py capture-error
+npm test 2>&1 | splice capture-error
 
 # 2. Triage in Kiro or Claude Code
 /harness debug the auth failure
@@ -104,7 +106,7 @@ npm test 2>&1 | python3 scripts/splice-cli.py capture-error
 /harness apply the fix using the orchestrated bundle
 
 # 4. Inspect bundle + metrics
-python3 scripts/splice-cli.py status
+splice status
 cat .splice/active-bundle.md
 ```
 
@@ -143,9 +145,24 @@ flowchart LR
 | **Kiro hook** | `UserPromptSubmit` → stdout appended to prompt |
 | **Cursor hook** | Writes `active-bundle.md` + rule reads it |
 | **Claude Code hook** | `UserPromptSubmit` + `SessionStart` → `additionalContext` |
-| **CLI** | `init`, `orchestrate`, `handoff`, `capture-error`, `doctor` |
+| **CLI** | `setup`, `init`, `orchestrate`, `handoff`, `capture-error`, `doctor`, `status` |
 | **Config** | `.splice/config.json` — per-project capture rules |
 | **Orchestrator** | mock · ollama · bedrock — [ORCHESTRATORS.md](ORCHESTRATORS.md) |
+
+---
+
+## CLI reference
+
+```bash
+splice setup                                   # install IDE hooks into current project
+splice setup /path/to/project --ide kiro       # specific project / specific IDE
+splice init --assistant kiro|cursor|claude     # create or resume a session
+splice orchestrate --assistant kiro --prompt "/harness ..."
+splice handoff --from kiro --to cursor
+splice capture-error                           # pipe stderr/stdout → .splice/last-error.log
+splice doctor                                  # verify mock/ollama/bedrock
+splice status                                  # show active session
+```
 
 ---
 
@@ -165,7 +182,7 @@ If Ollama is down, Splice **falls back to mock** automatically.
 
 ## Configure your project
 
-`.splice/config.json`:
+`.splice/config.json` (created automatically by `splice setup`):
 
 ```json
 {
@@ -189,19 +206,6 @@ If Ollama is down, Splice **falls back to mock** automatically.
 
 ---
 
-## CLI reference
-
-```bash
-python3 scripts/splice-cli.py init --assistant kiro|cursor
-python3 scripts/splice-cli.py orchestrate --assistant kiro --prompt "/harness ..."
-python3 scripts/splice-cli.py handoff --from kiro --to cursor
-python3 scripts/splice-cli.py capture-error
-python3 scripts/splice-cli.py doctor          # verify mock/ollama/bedrock
-python3 scripts/splice-cli.py status
-```
-
----
-
 ## AWS deploy (optional)
 
 ```bash
@@ -215,15 +219,19 @@ Stack sets `SPLICE_ORCHESTRATOR=bedrock` on Lambda. Local hooks don't need AWS.
 ## Project structure
 
 ```
+├── splice_cli/              # pip-installable package
+│   ├── cli.py               # splice entrypoint
+│   ├── shared/              # orchestrator, collect, store, config
+│   └── data/                # hooks + templates bundled with the package
 ├── scripts/
-│   ├── install-splice.sh    # Bootstrap any repo
-│   ├── splice-cli.py
+│   ├── install-splice.sh    # legacy bootstrap (pre-pip)
+│   ├── splice-cli.py        # legacy CLI script
 │   └── demo-dual-ide.py
-├── integrations/hooks/        # Kiro + Cursor + Claude Code
-├── src/shared/orchestrator.py # mock + ollama + bedrock
+├── integrations/hooks/      # Kiro + Cursor + Claude Code hook scripts
+├── src/shared/              # same modules for AWS Lambda handlers
 ├── ORCHESTRATORS.md
 ├── INSTALL.md
-└── demo-app/                  # Optional workshop sample
+└── demo-app/                # Optional workshop sample
 ```
 
 ---
@@ -242,7 +250,7 @@ Stack sets `SPLICE_ORCHESTRATOR=bedrock` on Lambda. Local hooks don't need AWS.
 | Doc | Description |
 |-----|-------------|
 | [ORCHESTRATORS.md](ORCHESTRATORS.md) | mock / Ollama / Bedrock |
-| [INSTALL.md](INSTALL.md) | Install in any project |
+| [INSTALL.md](INSTALL.md) | Manual install (without pip) |
 | [DEMO_KIRO_CURSOR.md](DEMO_KIRO_CURSOR.md) | Live walkthrough (Kiro, Cursor, Claude Code) |
 | [NEXT_ITERATIONS.md](NEXT_ITERATIONS.md) | Roadmap |
 
@@ -250,7 +258,7 @@ Stack sets `SPLICE_ORCHESTRATOR=bedrock` on Lambda. Local hooks don't need AWS.
 
 ## Contributing
 
-PRs welcome — especially IDE diagnostics capture and additional Ollama model presets.
+PRs welcome — especially IDE adapters (Windsurf, Zed) and Ollama model presets.
 
 ---
 

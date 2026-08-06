@@ -32,10 +32,11 @@ The community is already asking about Windsurf, Zed, Cline, and Continue. This m
 
 Makes the tool usable without cloning the repo.
 
-11. **`pip install splice-cli`** — publish to PyPI; single command install
-12. **Docs site** — mkdocs or Docusaurus; covers install, config reference, IDE adapters, orchestrator backends
-13. **GitHub Discussions** — replace issues-as-support with a structured forum for Q&A and ideas
-14. **`splice init` wizard** — interactive CLI that detects installed IDEs and configures hooks automatically
+11. ~~**`pip install splice-cli`**~~ — done; `splice setup` installs hooks, `splice doctor/orchestrate/handoff/status` work globally
+12. **Publish to PyPI** — `twine upload` so `pip install splice-cli` works for everyone
+13. **Docs site** — mkdocs or Docusaurus; covers install, config reference, IDE adapters, orchestrator backends
+14. **GitHub Discussions** — replace issues-as-support with a structured forum for Q&A and ideas
+15. **`npm install -g @splice/cli`** — thin JS wrapper that delegates to the Python CLI; for developers who prefer npm. Deferred until PyPI distribution is stable and there is community demand.
 
 ---
 

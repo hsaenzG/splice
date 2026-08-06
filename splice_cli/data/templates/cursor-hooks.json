@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "bash integrations/hooks/cursor-session-init.sh"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "bash integrations/hooks/cursor-orchestrate.sh",
+        "matcher": "UserPromptSubmit"
+      }
+    ]
+  }
+}

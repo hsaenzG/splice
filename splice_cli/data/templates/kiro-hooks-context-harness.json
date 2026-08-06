@@ -1,0 +1,28 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "splice-orchestrate",
+      "description": "Orchestrate context on /harness — shared with Cursor via .splice/",
+      "trigger": "UserPromptSubmit",
+      "matcher": "/harness|@harness",
+      "action": {
+        "type": "command",
+        "command": "bash integrations/hooks/kiro-orchestrate.sh"
+      },
+      "timeout": 10,
+      "enabled": true
+    },
+    {
+      "name": "splice-session-start",
+      "description": "Initialize shared Splice session",
+      "trigger": "SessionStart",
+      "action": {
+        "type": "command",
+        "command": "bash integrations/hooks/kiro-session-init.sh"
+      },
+      "timeout": 5,
+      "enabled": true
+    }
+  ]
+}

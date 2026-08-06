@@ -8,6 +8,8 @@ __pycache__/
 .Python
 .env
 .splice/
+.venv/
 demo-output.json
 .DS_Store
 docs/
+splice_cli.egg-info/
