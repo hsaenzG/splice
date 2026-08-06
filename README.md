@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/splice-logo.svg" alt="Splice Logo" width="320" />
+  <img src="https://raw.githubusercontent.com/hsaenzG/splice/main/assets/splice-logo.png" alt="Splice Logo" width="320" />
 </p>
 
 # Splice
