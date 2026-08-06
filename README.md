@@ -1,5 +1,11 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hsaenzG/splice/main/assets/splice-logo.png" alt="Splice Logo" width="320" />
+  <a href="https://github.com/hsaenzG/splice">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hsaenzG/splice/main/assets/splice-logo.png" />
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/hsaenzG/splice/main/assets/splice-logo.png" />
+      <img src="https://raw.githubusercontent.com/hsaenzG/splice/main/assets/splice-logo.png" alt="Splice Logo" width="320" />
+    </picture>
+  </a>
 </p>
 
 # Splice
