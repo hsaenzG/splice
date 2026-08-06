@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/splice-logo.svg" alt="Splice Logo" width="320" />
+</p>
+
 # Splice
 
 **Share orchestrated context between Kiro, Cursor, and Claude Code — one layer above the assistant.**
@@ -265,3 +269,9 @@ PRs welcome — especially IDE adapters (Windsurf, Zed) and Ollama model presets
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+## Author
+
+Created by **[Hazel Saenz](https://hazelsaenz.tech)** — LATAM Developer Advocate at AWS | Former AWS Serverless Hero.

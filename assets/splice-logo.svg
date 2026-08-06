@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" width="480" height="480">
+  <defs>
+    <!-- Terminal green -->
+    <linearGradient id="termGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4ADE80;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22C55E;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Electric purple -->
+    <linearGradient id="electricPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#A78BFA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Cyan wire -->
+    <linearGradient id="cyanWire" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22D3EE;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Amber wire -->
+    <linearGradient id="amberWire" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FBBF24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Coral wire -->
+    <linearGradient id="coralWire" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FB923C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F97316;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- PCB trace pattern -->
+    <pattern id="pcbGrid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="none"/>
+      <circle cx="10" cy="10" r="0.5" fill="#4ADE80" opacity="0.15"/>
+    </pattern>
+
+    <!-- Glow -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="strongGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Scanline overlay -->
+    <pattern id="scanlines" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="white" opacity="0.02"/>
+    </pattern>
+  </defs>
+
+  <!-- Dark background with subtle grid -->
+  <rect width="480" height="480" rx="24" ry="24" fill="#0A0A0F"/>
+  <rect width="480" height="480" rx="24" ry="24" fill="url(#pcbGrid)"/>
+  <rect width="480" height="480" rx="24" ry="24" fill="url(#scanlines)"/>
+
+  <!-- Outer border - circuit board aesthetic -->
+  <rect x="8" y="8" width="464" height="464" rx="20" ry="20" fill="none" stroke="#4ADE80" stroke-width="1" opacity="0.2"/>
+
+  <!-- Corner solder points -->
+  <circle cx="28" cy="28" r="4" fill="#4ADE80" opacity="0.4"/>
+  <circle cx="452" cy="28" r="4" fill="#4ADE80" opacity="0.4"/>
+  <circle cx="28" cy="452" r="4" fill="#4ADE80" opacity="0.4"/>
+  <circle cx="452" cy="452" r="4" fill="#4ADE80" opacity="0.4"/>
+
+  <!-- PCB traces decorative (top area) -->
+  <path d="M 28 28 L 80 28 L 80 45" fill="none" stroke="#4ADE80" stroke-width="1" opacity="0.2"/>
+  <path d="M 452 28 L 400 28 L 400 45" fill="none" stroke="#4ADE80" stroke-width="1" opacity="0.2"/>
+  <path d="M 28 452 L 80 452 L 80 435" fill="none" stroke="#4ADE80" stroke-width="1" opacity="0.2"/>
+  <path d="M 452 452 L 400 452 L 400 435" fill="none" stroke="#4ADE80" stroke-width="1" opacity="0.2"/>
+
+  <!-- === MAIN ICON: The Splice Junction === -->
+
+  <!-- Three input "wires" from top — representing IDE context streams -->
+
+  <!-- Wire 1 (Kiro - Cyan) - rigid PCB-style right-angle path -->
+  <path d="M 140 70 L 140 130 L 185 175 L 185 200"
+        fill="none" stroke="url(#cyanWire)" stroke-width="4"
+        stroke-linecap="square" filter="url(#glow)"/>
+  <!-- Connector pad top -->
+  <rect x="133" y="60" width="14" height="14" rx="2" fill="none" stroke="#22D3EE" stroke-width="2"/>
+  <rect x="136" y="63" width="8" height="8" rx="1" fill="#22D3EE" opacity="0.6"/>
+
+  <!-- Wire 2 (Cursor - Amber) - center straight line -->
+  <path d="M 240 70 L 240 200"
+        fill="none" stroke="url(#amberWire)" stroke-width="4"
+        stroke-linecap="square" filter="url(#glow)"/>
+  <!-- Connector pad top -->
+  <rect x="233" y="60" width="14" height="14" rx="2" fill="none" stroke="#FBBF24" stroke-width="2"/>
+  <rect x="236" y="63" width="8" height="8" rx="1" fill="#FBBF24" opacity="0.6"/>
+
+  <!-- Wire 3 (Claude - Coral) - right-angle from right -->
+  <path d="M 340 70 L 340 130 L 295 175 L 295 200"
+        fill="none" stroke="url(#coralWire)" stroke-width="4"
+        stroke-linecap="square" filter="url(#glow)"/>
+  <!-- Connector pad top -->
+  <rect x="333" y="60" width="14" height="14" rx="2" fill="none" stroke="#FB923C" stroke-width="2"/>
+  <rect x="336" y="63" width="8" height="8" rx="1" fill="#FB923C" opacity="0.6"/>
+
+  <!-- === THE SPLICE CHIP (IC package) === -->
+  <rect x="160" y="200" width="160" height="90" rx="6" ry="6" fill="#12121F" stroke="url(#electricPurple)" stroke-width="2.5"/>
+
+  <!-- IC notch -->
+  <path d="M 230 200 A 10 10 0 0 0 250 200" fill="#0A0A0F" stroke="url(#electricPurple)" stroke-width="1.5"/>
+
+  <!-- IC pin 1 indicator -->
+  <circle cx="175" cy="215" r="3" fill="#A78BFA" opacity="0.6"/>
+
+  <!-- IC internal text — the function -->
+  <text x="240" y="237" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="11" fill="#A78BFA" opacity="0.8">orchestrate()</text>
+
+  <!-- IC internal routing lines -->
+  <line x1="175" y1="250" x2="305" y2="250" stroke="#A78BFA" stroke-width="0.5" opacity="0.3"/>
+  <text x="240" y="268" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="9" fill="#4ADE80" opacity="0.7">ctx → bundle</text>
+
+  <!-- IC pins left side -->
+  <line x1="148" y1="220" x2="160" y2="220" stroke="#A78BFA" stroke-width="2" opacity="0.6"/>
+  <line x1="148" y1="240" x2="160" y2="240" stroke="#A78BFA" stroke-width="2" opacity="0.6"/>
+  <line x1="148" y1="260" x2="160" y2="260" stroke="#A78BFA" stroke-width="2" opacity="0.6"/>
+
+  <!-- IC pins right side -->
+  <line x1="320" y1="220" x2="332" y2="220" stroke="#A78BFA" stroke-width="2" opacity="0.6"/>
+  <line x1="320" y1="240" x2="332" y2="240" stroke="#A78BFA" stroke-width="2" opacity="0.6"/>
+  <line x1="320" y1="260" x2="332" y2="260" stroke="#A78BFA" stroke-width="2" opacity="0.6"/>
+
+  <!-- === OUTPUT WIRES (spliced/merged output) === -->
+
+  <!-- Output wire left - exits as unified green (orchestrated) -->
+  <path d="M 185 290 L 185 310 L 140 355 L 140 400"
+        fill="none" stroke="url(#termGreen)" stroke-width="4"
+        stroke-linecap="square" filter="url(#glow)"/>
+
+  <!-- Output wire center -->
+  <path d="M 240 290 L 240 400"
+        fill="none" stroke="url(#termGreen)" stroke-width="4"
+        stroke-linecap="square" filter="url(#glow)"/>
+
+  <!-- Output wire right -->
+  <path d="M 295 290 L 295 310 L 340 355 L 340 400"
+        fill="none" stroke="url(#termGreen)" stroke-width="4"
+        stroke-linecap="square" filter="url(#glow)"/>
+
+  <!-- Output connector pads (bottom) — all green now (unified output) -->
+  <rect x="133" y="400" width="14" height="14" rx="2" fill="none" stroke="#4ADE80" stroke-width="2"/>
+  <rect x="136" y="403" width="8" height="8" rx="1" fill="#4ADE80" opacity="0.6"/>
+
+  <rect x="233" y="400" width="14" height="14" rx="2" fill="none" stroke="#4ADE80" stroke-width="2"/>
+  <rect x="236" y="403" width="8" height="8" rx="1" fill="#4ADE80" opacity="0.6"/>
+
+  <rect x="333" y="400" width="14" height="14" rx="2" fill="none" stroke="#4ADE80" stroke-width="2"/>
+  <rect x="336" y="403" width="8" height="8" rx="1" fill="#4ADE80" opacity="0.6"/>
+
+  <!-- === LABELS === -->
+
+  <!-- IDE labels (top) -->
+  <text x="140" y="52" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="9" fill="#22D3EE" opacity="0.7">kiro</text>
+  <text x="240" y="52" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="9" fill="#FBBF24" opacity="0.7">cursor</text>
+  <text x="340" y="52" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="9" fill="#FB923C" opacity="0.7">claude</text>
+
+  <!-- Output labels (bottom) -->
+  <text x="140" y="432" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="8" fill="#4ADE80" opacity="0.5">bundle</text>
+  <text x="240" y="432" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="8" fill="#4ADE80" opacity="0.5">bundle</text>
+  <text x="340" y="432" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="8" fill="#4ADE80" opacity="0.5">bundle</text>
+
+  <!-- === TERMINAL PROMPT at bottom === -->
+  <rect x="60" y="440" width="360" height="28" rx="4" ry="4" fill="#1A1A2E" stroke="#4ADE80" stroke-width="1" opacity="0.8"/>
+  <text x="74" y="458" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="11" fill="#4ADE80" opacity="0.9">$</text>
+  <text x="88" y="458" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="11" fill="#E2E8F0" opacity="0.8">splice orchestrate</text>
+  <text x="248" y="458" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="11" fill="#A78BFA" opacity="0.7">--mode local</text>
+
+  <!-- Blinking cursor -->
+  <rect x="370" y="447" width="8" height="14" fill="#4ADE80" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1.2s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- === Data flow particles (animated dots on wires) === -->
+  <!-- Particle on left input wire -->
+  <circle r="2.5" fill="#22D3EE" filter="url(#glow)">
+    <animateMotion dur="2s" repeatCount="indefinite" path="M 140 70 L 140 130 L 185 175 L 185 200"/>
+  </circle>
+
+  <!-- Particle on center input wire -->
+  <circle r="2.5" fill="#FBBF24" filter="url(#glow)">
+    <animateMotion dur="1.8s" repeatCount="indefinite" path="M 240 70 L 240 200"/>
+  </circle>
+
+  <!-- Particle on right input wire -->
+  <circle r="2.5" fill="#FB923C" filter="url(#glow)">
+    <animateMotion dur="2.2s" repeatCount="indefinite" path="M 340 70 L 340 130 L 295 175 L 295 200"/>
+  </circle>
+
+  <!-- Particle on output wires (green — processed) -->
+  <circle r="2.5" fill="#4ADE80" filter="url(#glow)">
+    <animateMotion dur="2s" repeatCount="indefinite" begin="1s" path="M 185 290 L 185 310 L 140 355 L 140 400"/>
+  </circle>
+  <circle r="2.5" fill="#4ADE80" filter="url(#glow)">
+    <animateMotion dur="1.6s" repeatCount="indefinite" begin="0.8s" path="M 240 290 L 240 400"/>
+  </circle>
+  <circle r="2.5" fill="#4ADE80" filter="url(#glow)">
+    <animateMotion dur="2.1s" repeatCount="indefinite" begin="1.2s" path="M 295 290 L 295 310 L 340 355 L 340 400"/>
+  </circle>
+
+  <!-- === Version badge === -->
+  <rect x="370" y="15" width="90" height="18" rx="9" fill="#1A1A2E" stroke="#4ADE80" stroke-width="1" opacity="0.6"/>
+  <text x="415" y="28" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="8" fill="#4ADE80" opacity="0.8">v1.0 MIT</text>
+
+  <!-- === Wordmark === -->
+  <!-- Main wordmark positioned as if it were the IC chip label -->
+  <text x="240" y="283" text-anchor="middle" font-family="'JetBrains Mono', 'Fira Code', 'SF Mono', monospace" font-size="14" font-weight="bold" letter-spacing="6" fill="white" opacity="0.95">SPLICE</text>
+</svg>
