@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Splice — Zero-friction context sync for AI IDEs</title>
+  <meta name="description" content="Splice syncs context between Kiro, Cursor, and Claude Code automatically. Install once, forget about it.">
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/hsaenzG/splice/main/assets/splice-logo.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg: #0A0A0F;
+      --bg-card: #12121F;
+      --border: #1A1A2E;
+      --green: #4ADE80;
+      --green-dim: rgba(74, 222, 128, 0.15);
+      --purple: #A78BFA;
+      --purple-dim: rgba(167, 139, 250, 0.15);
+      --cyan: #22D3EE;
+      --amber: #FBBF24;
+      --coral: #FB923C;
+      --text: #E2E8F0;
+      --text-dim: #94A3B8;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* PCB dot grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, var(--green) 0.5px, transparent 0.5px);
+      background-size: 24px 24px;
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+
+    .logo {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 32px;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    h1 {
+      font-family: var(--mono);
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: 6px;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .tagline {
+      font-size: 1.25rem;
+      color: var(--text-dim);
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+
+    .badges {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .badges a img {
+      height: 24px;
+    }
+
+    /* CTA buttons */
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      background: #6EE7A0;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(74, 222, 128, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--purple);
+      border: 1px solid var(--purple);
+    }
+
+    .btn-secondary:hover {
+      background: var(--purple-dim);
+      transform: translateY(-2px);
+    }
+
+    .btn-tertiary {
+      background: var(--bg-card);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+
+    .btn-tertiary:hover {
+      border-color: var(--text-dim);
+      transform: translateY(-2px);
+    }
+
+    /* Terminal install block */
+    .install-block {
+      background: var(--bg-card);
+      border: 1px solid var(--green);
+      border-radius: 12px;
+      padding: 24px 32px;
+      margin: 48px auto;
+      max-width: 500px;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .install-block::before {
+      content: '$ ';
+      color: var(--green);
+      font-family: var(--mono);
+    }
+
+    .install-block code {
+      font-family: var(--mono);
+      font-size: 1rem;
+      color: white;
+    }
+
+    .install-block .dim {
+      color: var(--text-dim);
+    }
+
+    /* Sections */
+    section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    h2 {
+      font-family: var(--mono);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--green);
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2::before {
+      content: '>';
+      color: var(--purple);
+      font-weight: 400;
+    }
+
+    /* Feature grid */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--green);
+    }
+
+    .feature-card h3 {
+      font-family: var(--mono);
+      font-size: 1rem;
+      color: var(--cyan);
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    /* How it works */
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .flow-step {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-step .number {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    .flow-step .label {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+
+    .flow-step .desc {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .flow-step .action {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--amber);
+      margin-top: 8px;
+    }
+
+    /* IDEs section */
+    .ides {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .ide-badge {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ide-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    /* Metrics */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+    }
+
+    .metric {
+      text-align: center;
+      padding: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .metric .value {
+      font-family: var(--mono);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .metric .label {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 48px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    footer p {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      h1 { font-size: 2rem; letter-spacing: 4px; }
+      .tagline { font-size: 1rem; }
+      header { padding: 48px 0 40px; }
+      section { padding: 48px 0; }
+      .cta-group { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="logo">
+        <img src="https://raw.githubusercontent.com/hsaenzG/splice/main/assets/splice-logo.png" alt="Splice Logo">
+      </div>
+      <h1>SPLICE</h1>
+      <p class="tagline">Zero-friction context sync between Kiro, Cursor, and Claude Code. Install once, forget about it.</p>
+
+      <div class="badges">
+        <a href="https://pypi.org/project/splice-cli/"><img src="https://img.shields.io/pypi/v/splice-cli?style=flat-square&color=4ADE80" alt="PyPI"></a>
+        <a href="https://github.com/hsaenzG/splice"><img src="https://img.shields.io/github/stars/hsaenzG/splice?style=flat-square&color=A78BFA" alt="GitHub Stars"></a>
+        <a href="https://github.com/hsaenzG/splice/blob/main/LICENSE"><img src="https://img.shields.io/github/license/hsaenzG/splice?style=flat-square&color=22D3EE" alt="MIT License"></a>
+      </div>
+
+      <div class="cta-group">
+        <a href="https://pypi.org/project/splice-cli/" class="btn btn-primary">pip install splice-cli</a>
+        <a href="https://github.com/hsaenzG/splice" class="btn btn-secondary">GitHub Repo</a>
+        <a href="https://github.com/hsaenzG/splice/blob/main/ORCHESTRATORS.md" class="btn btn-tertiary">Docs</a>
+      </div>
+
+      <div class="install-block">
+        <code>pip install splice-cli && cd your-project && splice setup</code>
+        <br><br>
+        <span class="dim"># That's it. Context syncs automatically from now on.</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>How it works</h2>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="number">01</div>
+          <div class="label">You work</div>
+          <div class="desc">Write code in any IDE as usual</div>
+          <div class="action">you do: nothing</div>
+        </div>
+        <div class="flow-step">
+          <div class="number">02</div>
+          <div class="label">Context tracked</div>
+          <div class="desc">Every prompt silently analyzed</div>
+          <div class="action">you do: nothing</div>
+        </div>
+        <div class="flow-step">
+          <div class="number">03</div>
+          <div class="label">Commit</div>
+          <div class="desc">Bundle updated &amp; staged via pre-commit hook</div>
+          <div class="action">you do: git commit</div>
+        </div>
+        <div class="flow-step">
+          <div class="number">04</div>
+          <div class="label">Sync</div>
+          <div class="desc">Another IDE or machine gets the bundle via git</div>
+          <div class="action">you do: nothing</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Features</h2>
+      <div class="features">
+        <div class="feature-card">
+          <h3>Zero commands</h3>
+          <p>After setup, Splice is invisible. No triggers to remember, no workflow to learn.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Cross-IDE sync</h3>
+          <p>Context flows between Kiro, Cursor, and Claude Code via a shared bundle in your repo.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Cross-machine sync</h3>
+          <p>The bundle commits with your code. Any machine with git pull gets the full context.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Privacy-first</h3>
+          <p>Mock and Ollama modes keep your code on localhost. No cloud required for orchestration.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Smart routing</h3>
+          <p>Routes to the right agent profile (debugger, architect, implementer) based on context.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Language agnostic</h3>
+          <p>Works with Python, TypeScript, Go, Rust — any codebase, any project structure.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Metrics</h2>
+      <div class="metrics">
+        <div class="metric">
+          <div class="value">~96%</div>
+          <div class="label">Context reduction (Ollama)</div>
+        </div>
+        <div class="metric">
+          <div class="value">0 ms</div>
+          <div class="label">Latency (mock mode)</div>
+        </div>
+        <div class="metric">
+          <div class="value">0</div>
+          <div class="label">Commands after setup</div>
+        </div>
+        <div class="metric">
+          <div class="value">3</div>
+          <div class="label">IDEs supported</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Supported IDEs</h2>
+      <div class="ides">
+        <div class="ide-badge"><span class="dot"></span> Kiro</div>
+        <div class="ide-badge"><span class="dot"></span> Cursor</div>
+        <div class="ide-badge"><span class="dot"></span> Claude Code</div>
+        <div class="ide-badge"><span class="dot" style="background: var(--amber)"></span> Windsurf (planned)</div>
+        <div class="ide-badge"><span class="dot" style="background: var(--amber)"></span> Zed (planned)</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Orchestration modes</h2>
+      <div class="features">
+        <div class="feature-card">
+          <h3 style="color: var(--green)">mock</h3>
+          <p>Rule-based routing. Instant, offline, free. Code never leaves your machine.</p>
+        </div>
+        <div class="feature-card">
+          <h3 style="color: var(--amber)">ollama</h3>
+          <p>Local LLM (llama3.2). ~96% context reduction. Privacy-first — all on localhost.</p>
+        </div>
+        <div class="feature-card">
+          <h3 style="color: var(--coral)">bedrock</h3>
+          <p>AWS cloud. Amazon Nova Lite. For teams with AWS infrastructure already in place.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>
+        Created by <a href="https://hazelsaenz.tech">Hazel Saenz</a> — LATAM Developer Advocate at AWS | Former AWS Serverless Hero
+      </p>
+      <p style="margin-top: 12px;">
+        <a href="https://github.com/hsaenzG/splice">GitHub</a> &middot;
+        <a href="https://pypi.org/project/splice-cli/">PyPI</a> &middot;
+        <a href="https://github.com/hsaenzG/splice/blob/main/LICENSE">MIT License</a>
+      </p>
+    </footer>
+  </div>
+
+</body>
+</html>

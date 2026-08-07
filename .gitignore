@@ -11,5 +11,4 @@ __pycache__/
 .venv/
 demo-output.json
 .DS_Store
-docs/
 splice_cli.egg-info/
