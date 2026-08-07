@@ -28,6 +28,11 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 60px;
+    }
+
     body {
       background: var(--bg);
       color: var(--text);
@@ -48,6 +53,15 @@
       z-index: 0;
     }
 
+    #circuit-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .container {
       max-width: 960px;
       margin: 0 auto;
@@ -58,13 +72,13 @@
 
     /* Header */
     header {
-      padding: 80px 0 60px;
+      padding: 120px 0 60px;
       text-align: center;
     }
 
     .logo {
-      width: 200px;
-      height: 200px;
+      width: 320px;
+      height: 320px;
       margin: 0 auto 32px;
       border-radius: 16px;
       overflow: hidden;
@@ -165,26 +179,28 @@
       border-radius: 12px;
       padding: 24px 32px;
       margin: 48px auto;
-      max-width: 500px;
+      max-width: 620px;
       text-align: left;
       position: relative;
-      overflow: hidden;
     }
 
-    .install-block::before {
-      content: '$ ';
+    .install-block .prompt {
       color: var(--green);
       font-family: var(--mono);
     }
 
     .install-block code {
       font-family: var(--mono);
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: white;
     }
 
     .install-block .dim {
+      display: block;
+      margin-top: 12px;
       color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 0.85rem;
     }
 
     /* Sections */
@@ -367,18 +383,115 @@
       header { padding: 48px 0 40px; }
       section { padding: 48px 0; }
       .cta-group { flex-direction: column; align-items: center; }
+      nav { padding: 12px 16px; }
+      nav ul { gap: 12px; }
+      nav a { font-size: 0.7rem; }
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      transition: box-shadow 0.3s;
+    }
+
+    nav.scrolled {
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    nav .nav-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    nav .nav-brand {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 3px;
+      text-decoration: none;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    nav a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: var(--green);
+    }
+
+    nav a.active {
+      color: var(--green);
+    }
+
+    .lang-btn {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--bg);
+      background: var(--green);
+      border: none;
+      border-radius: 4px;
+      padding: 4px 10px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+
+    .lang-btn:hover {
+      background: #6EE7A0;
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
 
+  <canvas id="circuit-canvas"></canvas>
+
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-brand">SPLICE</a>
+      <ul>
+        <li><a href="#how-it-works" data-i18n="nav_how">How it works</a></li>
+        <li><a href="#features" data-i18n="nav_features">Features</a></li>
+        <li><a href="#metrics" data-i18n="nav_metrics">Metrics</a></li>
+        <li><a href="#ides" data-i18n="nav_ides">IDEs</a></li>
+        <li><a href="#modes" data-i18n="nav_modes">Modes</a></li>
+        <li><a href="https://github.com/hsaenzG/splice">GitHub</a></li>
+        <li><button id="lang-toggle" class="lang-btn">ES</button></li>
+      </ul>
+    </div>
+  </nav>
+
   <div class="container">
     <header>
       <div class="logo">
-        <img src="https://raw.githubusercontent.com/hsaenzG/splice/main/assets/splice-logo.png" alt="Splice Logo">
+        <img src="splice-logo.png" alt="Splice Logo">
       </div>
       <h1>SPLICE</h1>
-      <p class="tagline">Zero-friction context sync between Kiro, Cursor, and Claude Code. Install once, forget about it.</p>
+      <p class="tagline" data-i18n="tagline">Zero-friction context sync between Kiro, Cursor, and Claude Code. Install once, forget about it.</p>
 
       <div class="badges">
         <a href="https://pypi.org/project/splice-cli/"><img src="https://img.shields.io/pypi/v/splice-cli?style=flat-square&color=4ADE80" alt="PyPI"></a>
@@ -389,100 +502,99 @@
       <div class="cta-group">
         <a href="https://pypi.org/project/splice-cli/" class="btn btn-primary">pip install splice-cli</a>
         <a href="https://github.com/hsaenzG/splice" class="btn btn-secondary">GitHub Repo</a>
-        <a href="https://github.com/hsaenzG/splice/blob/main/ORCHESTRATORS.md" class="btn btn-tertiary">Docs</a>
+        <a href="https://github.com/hsaenzG/splice/blob/main/ORCHESTRATORS.md" class="btn btn-tertiary" data-i18n="btn_docs">Docs</a>
       </div>
 
       <div class="install-block">
-        <code>pip install splice-cli && cd your-project && splice setup</code>
-        <br><br>
-        <span class="dim"># That's it. Context syncs automatically from now on.</span>
+        <span class="prompt">$ </span><code>pip install splice-cli && cd your-project && splice setup</code>
+        <span class="dim" data-i18n="install_comment"># That's it. Context syncs automatically from now on.</span>
       </div>
     </header>
 
-    <section>
-      <h2>How it works</h2>
+    <section id="how-it-works">
+      <h2 data-i18n="h_how">How it works</h2>
       <div class="flow">
         <div class="flow-step">
           <div class="number">01</div>
-          <div class="label">You work</div>
-          <div class="desc">Write code in any IDE as usual</div>
-          <div class="action">you do: nothing</div>
+          <div class="label" data-i18n="flow1_label">You work</div>
+          <div class="desc" data-i18n="flow1_desc">Write code in any IDE as usual</div>
+          <div class="action" data-i18n="flow1_action">you do: nothing</div>
         </div>
         <div class="flow-step">
           <div class="number">02</div>
-          <div class="label">Context tracked</div>
-          <div class="desc">Every prompt silently analyzed</div>
-          <div class="action">you do: nothing</div>
+          <div class="label" data-i18n="flow2_label">Context tracked</div>
+          <div class="desc" data-i18n="flow2_desc">Every prompt silently analyzed</div>
+          <div class="action" data-i18n="flow2_action">you do: nothing</div>
         </div>
         <div class="flow-step">
           <div class="number">03</div>
-          <div class="label">Commit</div>
-          <div class="desc">Bundle updated &amp; staged via pre-commit hook</div>
+          <div class="label" data-i18n="flow3_label">Commit</div>
+          <div class="desc" data-i18n="flow3_desc">Bundle updated &amp; staged via pre-commit hook</div>
           <div class="action">you do: git commit</div>
         </div>
         <div class="flow-step">
           <div class="number">04</div>
-          <div class="label">Sync</div>
-          <div class="desc">Another IDE or machine gets the bundle via git</div>
-          <div class="action">you do: nothing</div>
+          <div class="label" data-i18n="flow4_label">Sync</div>
+          <div class="desc" data-i18n="flow4_desc">Another IDE or machine gets the bundle via git</div>
+          <div class="action" data-i18n="flow4_action">you do: nothing</div>
         </div>
       </div>
     </section>
 
-    <section>
-      <h2>Features</h2>
+    <section id="features">
+      <h2 data-i18n="h_features">Features</h2>
       <div class="features">
         <div class="feature-card">
-          <h3>Zero commands</h3>
-          <p>After setup, Splice is invisible. No triggers to remember, no workflow to learn.</p>
+          <h3 data-i18n="feat1_h">Zero commands</h3>
+          <p data-i18n="feat1_p">After setup, Splice is invisible. No triggers to remember, no workflow to learn.</p>
         </div>
         <div class="feature-card">
-          <h3>Cross-IDE sync</h3>
-          <p>Context flows between Kiro, Cursor, and Claude Code via a shared bundle in your repo.</p>
+          <h3 data-i18n="feat2_h">Cross-IDE sync</h3>
+          <p data-i18n="feat2_p">Context flows between Kiro, Cursor, and Claude Code via a shared bundle in your repo.</p>
         </div>
         <div class="feature-card">
-          <h3>Cross-machine sync</h3>
-          <p>The bundle commits with your code. Any machine with git pull gets the full context.</p>
+          <h3 data-i18n="feat3_h">Cross-machine sync</h3>
+          <p data-i18n="feat3_p">The bundle commits with your code. Any machine with git pull gets the full context.</p>
         </div>
         <div class="feature-card">
-          <h3>Privacy-first</h3>
-          <p>Mock and Ollama modes keep your code on localhost. No cloud required for orchestration.</p>
+          <h3 data-i18n="feat4_h">Privacy-first</h3>
+          <p data-i18n="feat4_p">Mock and Ollama modes keep your code on localhost. No cloud required for orchestration.</p>
         </div>
         <div class="feature-card">
-          <h3>Smart routing</h3>
-          <p>Routes to the right agent profile (debugger, architect, implementer) based on context.</p>
+          <h3 data-i18n="feat5_h">Smart routing</h3>
+          <p data-i18n="feat5_p">Routes to the right agent profile (debugger, architect, implementer) based on context.</p>
         </div>
         <div class="feature-card">
-          <h3>Language agnostic</h3>
-          <p>Works with Python, TypeScript, Go, Rust — any codebase, any project structure.</p>
+          <h3 data-i18n="feat6_h">Language agnostic</h3>
+          <p data-i18n="feat6_p">Works with Python, TypeScript, Go, Rust — any codebase, any project structure.</p>
         </div>
       </div>
     </section>
 
-    <section>
-      <h2>Metrics</h2>
+    <section id="metrics">
+      <h2 data-i18n="h_metrics">Metrics</h2>
       <div class="metrics">
         <div class="metric">
           <div class="value">~96%</div>
-          <div class="label">Context reduction (Ollama)</div>
+          <div class="label" data-i18n="metric1">Context reduction (Ollama)</div>
         </div>
         <div class="metric">
           <div class="value">0 ms</div>
-          <div class="label">Latency (mock mode)</div>
+          <div class="label" data-i18n="metric2">Latency (mock mode)</div>
         </div>
         <div class="metric">
           <div class="value">0</div>
-          <div class="label">Commands after setup</div>
+          <div class="label" data-i18n="metric3">Commands after setup</div>
         </div>
         <div class="metric">
           <div class="value">3</div>
-          <div class="label">IDEs supported</div>
+          <div class="label" data-i18n="metric4">IDEs supported</div>
         </div>
       </div>
     </section>
 
-    <section>
-      <h2>Supported IDEs</h2>
+    <section id="ides">
+      <h2 data-i18n="h_ides">Supported IDEs</h2>
       <div class="ides">
         <div class="ide-badge"><span class="dot"></span> Kiro</div>
         <div class="ide-badge"><span class="dot"></span> Cursor</div>
@@ -492,20 +604,20 @@
       </div>
     </section>
 
-    <section>
-      <h2>Orchestration modes</h2>
+    <section id="modes">
+      <h2 data-i18n="h_modes">Orchestration modes</h2>
       <div class="features">
         <div class="feature-card">
           <h3 style="color: var(--green)">mock</h3>
-          <p>Rule-based routing. Instant, offline, free. Code never leaves your machine.</p>
+          <p data-i18n="mode1_p">Rule-based routing. Instant, offline, free. Code never leaves your machine.</p>
         </div>
         <div class="feature-card">
           <h3 style="color: var(--amber)">ollama</h3>
-          <p>Local LLM (llama3.2). ~96% context reduction. Privacy-first — all on localhost.</p>
+          <p data-i18n="mode2_p">Local LLM (llama3.2). ~96% context reduction. Privacy-first — all on localhost.</p>
         </div>
         <div class="feature-card">
           <h3 style="color: var(--coral)">bedrock</h3>
-          <p>AWS cloud. Amazon Nova Lite. For teams with AWS infrastructure already in place.</p>
+          <p data-i18n="mode3_p">AWS cloud. Amazon Nova Lite. For teams with AWS infrastructure already in place.</p>
         </div>
       </div>
     </section>
@@ -521,6 +633,275 @@
       </p>
     </footer>
   </div>
+
+  <script>
+    // --- i18n ---
+    const translations = {
+      en: {
+        nav_how: "How it works", nav_features: "Features", nav_metrics: "Metrics",
+        nav_ides: "IDEs", nav_modes: "Modes", btn_docs: "Docs",
+        tagline: "Zero-friction context sync between Kiro, Cursor, and Claude Code. Install once, forget about it.",
+        install_comment: "# That's it. Context syncs automatically from now on.",
+        h_how: "How it works", h_features: "Features", h_metrics: "Metrics",
+        h_ides: "Supported IDEs", h_modes: "Orchestration modes",
+        flow1_label: "You work", flow1_desc: "Write code in any IDE as usual", flow1_action: "you do: nothing",
+        flow2_label: "Context tracked", flow2_desc: "Every prompt silently analyzed", flow2_action: "you do: nothing",
+        flow3_label: "Commit", flow3_desc: "Bundle updated & staged via pre-commit hook",
+        flow4_label: "Sync", flow4_desc: "Another IDE or machine gets the bundle via git", flow4_action: "you do: nothing",
+        feat1_h: "Zero commands", feat1_p: "After setup, Splice is invisible. No triggers to remember, no workflow to learn.",
+        feat2_h: "Cross-IDE sync", feat2_p: "Context flows between Kiro, Cursor, and Claude Code via a shared bundle in your repo.",
+        feat3_h: "Cross-machine sync", feat3_p: "The bundle commits with your code. Any machine with git pull gets the full context.",
+        feat4_h: "Privacy-first", feat4_p: "Mock and Ollama modes keep your code on localhost. No cloud required for orchestration.",
+        feat5_h: "Smart routing", feat5_p: "Routes to the right agent profile (debugger, architect, implementer) based on context.",
+        feat6_h: "Language agnostic", feat6_p: "Works with Python, TypeScript, Go, Rust — any codebase, any project structure.",
+        metric1: "Context reduction (Ollama)", metric2: "Latency (mock mode)",
+        metric3: "Commands after setup", metric4: "IDEs supported",
+        mode1_p: "Rule-based routing. Instant, offline, free. Code never leaves your machine.",
+        mode2_p: "Local LLM (llama3.2). ~96% context reduction. Privacy-first — all on localhost.",
+        mode3_p: "AWS cloud. Amazon Nova Lite. For teams with AWS infrastructure already in place.",
+      },
+      es: {
+        nav_how: "Cómo funciona", nav_features: "Características", nav_metrics: "Métricas",
+        nav_ides: "IDEs", nav_modes: "Modos", btn_docs: "Docs",
+        tagline: "Sincronización de contexto sin fricción entre Kiro, Cursor y Claude Code. Instala una vez, olvídate para siempre.",
+        install_comment: "# Eso es todo. El contexto se sincroniza automáticamente.",
+        h_how: "Cómo funciona", h_features: "Características", h_metrics: "Métricas",
+        h_ides: "IDEs soportados", h_modes: "Modos de orquestación",
+        flow1_label: "Trabajas", flow1_desc: "Escribe código en cualquier IDE como siempre", flow1_action: "tú haces: nada",
+        flow2_label: "Contexto rastreado", flow2_desc: "Cada prompt analizado silenciosamente", flow2_action: "tú haces: nada",
+        flow3_label: "Commit", flow3_desc: "Bundle actualizado y staged vía pre-commit hook",
+        flow4_label: "Sync", flow4_desc: "Otro IDE u otra máquina recibe el bundle vía git", flow4_action: "tú haces: nada",
+        feat1_h: "Cero comandos", feat1_p: "Después del setup, Splice es invisible. Nada que recordar, nada que aprender.",
+        feat2_h: "Sync entre IDEs", feat2_p: "El contexto fluye entre Kiro, Cursor y Claude Code vía un bundle compartido en tu repo.",
+        feat3_h: "Sync entre máquinas", feat3_p: "El bundle se commitea con tu código. Cualquier máquina con git pull tiene el contexto completo.",
+        feat4_h: "Privacidad primero", feat4_p: "Los modos mock y Ollama mantienen tu código en localhost. No requiere cloud para la orquestación.",
+        feat5_h: "Routing inteligente", feat5_p: "Enruta al perfil de agente correcto (debugger, arquitecto, implementador) según el contexto.",
+        feat6_h: "Agnóstico al lenguaje", feat6_p: "Funciona con Python, TypeScript, Go, Rust — cualquier codebase, cualquier estructura.",
+        metric1: "Reducción de contexto (Ollama)", metric2: "Latencia (modo mock)",
+        metric3: "Comandos después del setup", metric4: "IDEs soportados",
+        mode1_p: "Routing basado en reglas. Instantáneo, offline, gratis. Tu código nunca sale de tu máquina.",
+        mode2_p: "LLM local (llama3.2). ~96% reducción de contexto. Privacidad total — todo en localhost.",
+        mode3_p: "AWS cloud. Amazon Nova Lite. Para equipos con infraestructura AWS existente.",
+      }
+    };
+
+    let currentLang = localStorage.getItem('splice-lang') || 'en';
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('splice-lang', lang);
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+          el.textContent = translations[lang][key];
+        }
+      });
+      document.getElementById('lang-toggle').textContent = lang === 'en' ? 'ES' : 'EN';
+    }
+
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      setLang(currentLang === 'en' ? 'es' : 'en');
+    });
+
+    // Apply saved language on load
+    if (currentLang !== 'en') setLang(currentLang);
+
+    // Nav scroll behavior
+    const nav = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        if (href === '#') return;
+        e.preventDefault();
+        const target = document.getElementById(href.substring(1));
+        if (target) {
+          const navHeight = document.getElementById('navbar').offsetHeight;
+          const top = target.getBoundingClientRect().top + window.scrollY - navHeight - 16;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Animated PCB circuit traces with flowing particles
+    const canvas = document.getElementById('circuit-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W, H;
+    const traces = [];
+    const particles = [];
+    const GRID = 40;
+    const TRACE_COUNT = 18;
+    const PARTICLE_COUNT = 40;
+
+    const colors = [
+      { r: 74, g: 222, b: 128 },   // green
+      { r: 34, g: 211, b: 238 },   // cyan
+      { r: 167, g: 139, b: 250 },  // purple
+      { r: 251, g: 191, b: 36 },   // amber
+      { r: 249, g: 115, b: 22 },   // coral
+    ];
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      generateTraces();
+    }
+
+    function snap(v) {
+      return Math.round(v / GRID) * GRID;
+    }
+
+    function generateTraces() {
+      traces.length = 0;
+      for (let i = 0; i < TRACE_COUNT; i++) {
+        const points = [];
+        let x = snap(Math.random() * W);
+        let y = snap(Math.random() * H);
+        points.push({ x, y });
+
+        const segments = 4 + Math.floor(Math.random() * 6);
+        for (let s = 0; s < segments; s++) {
+          // PCB-style: only horizontal or vertical moves
+          if (Math.random() > 0.5) {
+            x += (Math.random() > 0.5 ? 1 : -1) * GRID * (2 + Math.floor(Math.random() * 5));
+          } else {
+            y += (Math.random() > 0.5 ? 1 : -1) * GRID * (2 + Math.floor(Math.random() * 5));
+          }
+          x = Math.max(0, Math.min(W, x));
+          y = Math.max(0, Math.min(H, y));
+          points.push({ x: snap(x), y: snap(y) });
+        }
+
+        traces.push({
+          points,
+          color: colors[i % colors.length],
+          opacity: 0.08 + Math.random() * 0.07,
+        });
+      }
+
+      // Generate particles on traces
+      particles.length = 0;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const trace = traces[Math.floor(Math.random() * traces.length)];
+        particles.push({
+          trace,
+          progress: Math.random(),
+          speed: 0.001 + Math.random() * 0.003,
+          size: 2 + Math.random() * 2,
+          color: trace.color,
+        });
+      }
+    }
+
+    function getPointOnTrace(trace, t) {
+      const pts = trace.points;
+      if (pts.length < 2) return pts[0];
+
+      // Calculate total length
+      let totalLen = 0;
+      const segLens = [];
+      for (let i = 1; i < pts.length; i++) {
+        const dx = pts[i].x - pts[i-1].x;
+        const dy = pts[i].y - pts[i-1].y;
+        const len = Math.sqrt(dx*dx + dy*dy);
+        segLens.push(len);
+        totalLen += len;
+      }
+
+      let target = t * totalLen;
+      let accum = 0;
+      for (let i = 0; i < segLens.length; i++) {
+        if (accum + segLens[i] >= target) {
+          const localT = (target - accum) / segLens[i];
+          return {
+            x: pts[i].x + (pts[i+1].x - pts[i].x) * localT,
+            y: pts[i].y + (pts[i+1].y - pts[i].y) * localT,
+          };
+        }
+        accum += segLens[i];
+      }
+      return pts[pts.length - 1];
+    }
+
+    function drawTraces() {
+      for (const trace of traces) {
+        const { r, g, b } = trace.color;
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${trace.opacity})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(trace.points[0].x, trace.points[0].y);
+        for (let i = 1; i < trace.points.length; i++) {
+          ctx.lineTo(trace.points[i].x, trace.points[i].y);
+        }
+        ctx.stroke();
+
+        // Draw solder pads at endpoints
+        for (const pt of trace.points) {
+          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${trace.opacity * 0.8})`;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function drawParticles() {
+      for (const p of particles) {
+        const pos = getPointOnTrace(p.trace, p.progress);
+        const { r, g, b } = p.color;
+
+        // Glow
+        ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.9)`;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Trail
+        const trailPos = getPointOnTrace(p.trace, Math.max(0, p.progress - 0.03));
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.3)`;
+        ctx.lineWidth = p.size * 0.8;
+        ctx.beginPath();
+        ctx.moveTo(trailPos.x, trailPos.y);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      }
+    }
+
+    function updateParticles() {
+      for (const p of particles) {
+        p.progress += p.speed;
+        if (p.progress > 1) {
+          p.progress = 0;
+          // Optionally jump to a new trace
+          if (Math.random() > 0.7) {
+            p.trace = traces[Math.floor(Math.random() * traces.length)];
+            p.color = p.trace.color;
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+      drawTraces();
+      drawParticles();
+      updateParticles();
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    animate();
+  </script>
 
 </body>
 </html>
