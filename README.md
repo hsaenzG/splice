@@ -141,7 +141,7 @@ The bundle is a markdown summary of your current context: errors, relevant files
 {
   "orchestrator": "mock",
   "captureGitDiff": true,
-  "includePaths": ["src/**/*.ts"],
+  "includePaths": ["src/**/*.py"],
   "errorSources": [".splice/last-error.log"],
   "ollama": { "model": "llama3.2" },
   "bedrock": { "modelId": "amazon.nova-lite-v1:0" }
@@ -151,7 +151,7 @@ The bundle is a markdown summary of your current context: errors, relevant files
 | Field | What it does |
 |-------|-------------|
 | `orchestrator` | `mock` · `ollama` · `bedrock` |
-| `includePaths` | Always include these files in context |
+| `includePaths` | Always include these files in context (e.g. `src/**/*.py`, `lib/**/*.ts`, `**/*.go`) |
 | `errorSources` | Log files to read as error context |
 | `captureGitDiff` | Include git diff in context |
 
