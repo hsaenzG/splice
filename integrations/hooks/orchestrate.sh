@@ -7,6 +7,6 @@ cd "$ROOT"
 ASSISTANT="${SPLICE_ASSISTANT:-kiro}"
 INPUT="$(cat)"
 
-python3 scripts/splice-cli.py orchestrate \
+splice orchestrate \
   --assistant "$ASSISTANT" \
   --format compact <<< "$INPUT"

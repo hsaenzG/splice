@@ -6,7 +6,7 @@ cd "$ROOT"
 
 INPUT="$(cat)"
 
-python3 scripts/splice-cli.py orchestrate \
+splice orchestrate \
   --assistant cursor \
   --hook-mode \
   --format markdown <<< "$INPUT"

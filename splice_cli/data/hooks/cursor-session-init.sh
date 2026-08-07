@@ -4,9 +4,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
-python3 scripts/splice-cli.py init --assistant cursor >/dev/null 2>&1 || true
+splice init --assistant cursor >/dev/null 2>&1 || true
 
-python3 scripts/splice-cli.py orchestrate \
+splice orchestrate \
   --assistant cursor \
   --prompt "Session start — index demo-app bug context" \
   --always \
@@ -25,8 +25,6 @@ print(json.dumps({
 
 When the user includes /harness or @harness in a prompt, orchestration runs automatically.
 Always read .splice/active-bundle.md at the start of each turn if it exists — it contains the reduced context bundle.
-
-Demo bug: demo-app/UserList.tsx crashes because API returns { items: [] } not a raw array.
 
 Session bundle:
 ''' + bundle

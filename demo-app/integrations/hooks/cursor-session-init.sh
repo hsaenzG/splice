@@ -4,9 +4,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
-python3 scripts/splice-cli.py init --assistant cursor >/dev/null 2>&1 || true
+splice init --assistant cursor >/dev/null 2>&1 || true
 
-python3 scripts/splice-cli.py orchestrate \
+splice orchestrate \
   --assistant cursor \
   --prompt "Session start — index demo-app bug context" \
   --always \

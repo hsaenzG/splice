@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "splice-cli"
-version = "0.1.1"
+version = "0.1.2"
 description = "Shared context layer for Kiro, Cursor, and Claude Code — one trigger, any IDE, privacy-first."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = { file = "LICENSE" }

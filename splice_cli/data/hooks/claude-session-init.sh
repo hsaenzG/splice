@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
-python3 scripts/splice-cli.py init --assistant claude >/dev/null 2>&1 || true
+splice init --assistant claude >/dev/null 2>&1 || true
 
 BUNDLE=""
 if [[ -f .splice/active-bundle.md ]]; then
@@ -30,4 +30,4 @@ print(json.dumps({
     'additionalContext': ctx
   }
 }))
-" <<< "$BUNDLE"
+" <<< "\$BUNDLE"

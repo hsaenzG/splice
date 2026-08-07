@@ -32,7 +32,7 @@ sys.exit(0 if any(t in prompt for t in ('/harness', '@harness', 'splice')) else 
   exit 0
 fi
 
-python3 "$ROOT/scripts/splice-cli.py" orchestrate \
+splice orchestrate \
   --assistant claude \
   --format claude \
   --hook-mode \

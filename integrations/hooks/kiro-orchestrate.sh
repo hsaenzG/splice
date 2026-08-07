@@ -20,7 +20,7 @@ if [[ -z "$INPUT" ]]; then
   INPUT='{"prompt":"/harness"}'
 fi
 
-python3 "$ROOT/scripts/splice-cli.py" orchestrate \
+splice orchestrate \
   --assistant kiro \
   --format compact \
   --hook-mode \

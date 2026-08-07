@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Kiro UserPromptSubmit hook — fast, non-blocking, absolute paths
+# Kiro UserPromptSubmit hook — fast, non-blocking
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -16,11 +16,10 @@ print(sys.stdin.read() if ready else '', end='')
 " 2>/dev/null || true)"
 
 if [[ -z "$INPUT" ]]; then
-  # Fallback: still orchestrate demo context without user prompt text
   INPUT='{"prompt":"/harness"}'
 fi
 
-python3 "$ROOT/scripts/splice-cli.py" orchestrate \
+splice orchestrate \
   --assistant kiro \
   --format compact \
   --hook-mode \
