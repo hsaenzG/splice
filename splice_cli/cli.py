@@ -60,7 +60,6 @@ _SHARED_HOOKS = [
 _GITIGNORE_SNIPPET = """
 # splice
 .splice/session.json
-.splice/active-bundle.md
 .splice/last-error.log
 """
 
@@ -178,6 +177,28 @@ def cmd_setup(args: argparse.Namespace) -> int:
         gitignore.write_text(_GITIGNORE_SNIPPET.strip() + "\n")
         installed.append(".gitignore (created)")
 
+    # Git pre-commit hook — auto-generates bundle before each commit
+    git_hooks_dir = target / ".git" / "hooks"
+    if git_hooks_dir.exists():
+        pre_commit_src = data / "hooks" / "pre-commit"
+        pre_commit_dst = git_hooks_dir / "pre-commit"
+        if pre_commit_src.exists():
+            if pre_commit_dst.exists() and not args.force:
+                # Append splice hook to existing pre-commit if not already there
+                existing = pre_commit_dst.read_text()
+                if "splice" not in existing.lower():
+                    pre_commit_dst.write_text(
+                        existing.rstrip() + "\n\n# --- Splice pre-commit ---\n"
+                        + pre_commit_src.read_text() + "\n"
+                    )
+                    installed.append(".git/hooks/pre-commit (appended)")
+                else:
+                    skipped.append(".git/hooks/pre-commit (splice already present)")
+            else:
+                shutil.copy2(pre_commit_src, pre_commit_dst)
+                pre_commit_dst.chmod(pre_commit_dst.stat().st_mode | 0o755)
+                installed.append(".git/hooks/pre-commit")
+
     # Summary
     print()
     if installed:
@@ -190,13 +211,13 @@ def cmd_setup(args: argparse.Namespace) -> int:
             print(f"  ~ {f}")
 
     print(f"""
-Done. Next steps:
-  1. Edit {target / '.splice/config.json'} for your project
-  2. Restart Kiro, Cursor, and/or Claude Code
-  3. In any assistant: /harness <your task>
+Done. Splice is now active in this project.
 
-Optional: pipe errors before /harness
-  npm test 2>&1 | splice capture-error
+  - Context is tracked automatically as you work.
+  - Bundle updates on every commit (pre-commit hook).
+  - Other IDEs pick up the bundle on session start — no manual steps needed.
+
+Optional: edit {target / '.splice/config.json'} to customize capture rules.
 """)
     return 0
 
@@ -279,10 +300,16 @@ def cmd_orchestrate(args: argparse.Namespace) -> int:
 
     if args.fresh:
         session = ensure_session(args.assistant, root=ROOT)
-        session["contextItems"] = items
+        # Preserve context items from other assistants, only replace items from this assistant
+        prev_items = session.get("contextItems", [])
+        other_items = [
+            item for item in prev_items
+            if (item.get("metadata") or {}).get("assistant") != args.assistant
+        ]
+        session["contextItems"] = other_items + items
         from splice_cli.shared.store import save_session
         save_session(session, ROOT)
-        all_items = items
+        all_items = session["contextItems"]
     else:
         session = add_context_items(items, ROOT)
         all_items = session.get("contextItems", [])

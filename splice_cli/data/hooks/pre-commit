@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Splice pre-commit hook — regenerate context bundle before each commit.
+# Installed by: splice setup
+# The bundle (.splice/active-bundle.md) is committed with your code so any
+# IDE on any machine gets the latest context automatically on pull.
+
+set -euo pipefail
+
+# Resolve splice CLI (same fallback chain as IDE hooks)
+SPLICE_CMD=""
+if command -v splice &>/dev/null; then
+  SPLICE_CMD="splice"
+elif python3 -m splice_cli.cli --version &>/dev/null 2>&1; then
+  SPLICE_CMD="python3 -m splice_cli.cli"
+else
+  # Splice not installed — skip silently (don't block commits)
+  exit 0
+fi
+
+# Only run if there's an active session
+if [[ ! -f .splice/session.json ]]; then
+  exit 0
+fi
+
+# Detect which assistant last touched the session
+ASSISTANT=$(python3 -c "
+import json, pathlib
+s = json.loads(pathlib.Path('.splice/session.json').read_text())
+print(s.get('assistant', 'kiro'))
+" 2>/dev/null || echo "kiro")
+
+# Regenerate the bundle from accumulated context
+$SPLICE_CMD orchestrate \
+  --assistant "$ASSISTANT" \
+  --prompt "Pre-commit context sync" \
+  --always \
+  --format markdown >/dev/null 2>&1 || true
+
+# Stage the bundle so it's included in this commit
+if [[ -f .splice/active-bundle.md ]]; then
+  git add .splice/active-bundle.md
+fi
+
+exit 0

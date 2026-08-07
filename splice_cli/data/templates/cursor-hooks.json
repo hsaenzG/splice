@@ -8,8 +8,7 @@
     ],
     "beforeSubmitPrompt": [
       {
-        "command": "bash integrations/hooks/cursor-orchestrate.sh",
-        "matcher": "UserPromptSubmit"
+        "command": "bash integrations/hooks/cursor-orchestrate.sh"
       }
     ]
   }

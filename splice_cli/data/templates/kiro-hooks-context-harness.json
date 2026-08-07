@@ -2,10 +2,9 @@
   "version": "v1",
   "hooks": [
     {
-      "name": "splice-orchestrate",
-      "description": "Orchestrate context on /harness — shared with Cursor via .splice/",
+      "name": "splice-context-track",
+      "description": "Silently track context on every prompt. Outputs bundle only on /harness.",
       "trigger": "UserPromptSubmit",
-      "matcher": "/harness|@harness",
       "action": {
         "type": "command",
         "command": "bash integrations/hooks/kiro-orchestrate.sh"
@@ -15,7 +14,7 @@
     },
     {
       "name": "splice-session-start",
-      "description": "Initialize shared Splice session",
+      "description": "Auto-inject existing bundle on session start (synced via git)",
       "trigger": "SessionStart",
       "action": {
         "type": "command",

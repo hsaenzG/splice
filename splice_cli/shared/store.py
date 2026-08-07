@@ -43,6 +43,10 @@ def ensure_session(assistant: str, project: str | None = None, root: Path | None
     existing = load_session(root)
     if existing:
         existing["assistant"] = assistant
+        # Track all assistants that have used this session
+        used = existing.setdefault("assistantsUsed", [])
+        if assistant not in used:
+            used.append(assistant)
         existing["updatedAt"] = utc_now()
         save_session(existing, root)
         return existing
@@ -90,11 +94,13 @@ def save_orchestration(result: dict[str, Any], root: Path | None = None) -> None
 
 def write_bundle_markdown(result: dict[str, Any], root: Path | None = None) -> Path:
     metrics = result.get("metrics", {})
+    assistants_used = result.get("assistantsUsed", [])
     lines = [
         "# Splice — Active Bundle",
         "",
         f"- **Session:** `{result.get('sessionId', 'n/a')}`",
         f"- **Source assistant:** {result.get('sourceAssistant', 'n/a')}",
+        f"- **Assistants used:** {', '.join(assistants_used) if assistants_used else 'n/a'}",
         f"- **Recommended agent:** `{result.get('recommendedAgent')}`",
         f"- **Workflow:** `{result.get('workflow')}`",
         f"- **Handoff:** {result.get('handoffRecommendation', 'none')}",
@@ -113,9 +119,11 @@ def write_bundle_markdown(result: dict[str, Any], root: Path | None = None) -> P
         if isinstance(meta, str):
             meta = {"path": meta}
         path = meta.get("path", item.get("type", "item")) if isinstance(meta, dict) else item.get("type", "item")
+        item_assistant = meta.get("assistant", "") if isinstance(meta, dict) else ""
+        source_label = f" (from {item_assistant})" if item_assistant else ""
         lines.extend(
             [
-                f"### {i}. [{item.get('type')}] {path} (relevance {item.get('relevanceScore', 0)})",
+                f"### {i}. [{item.get('type')}] {path}{source_label} (relevance {item.get('relevanceScore', 0)})",
                 "",
                 "```",
                 str(item.get("content", ""))[:1500],

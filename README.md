@@ -10,37 +10,52 @@
 
 # Splice
 
-**Share orchestrated context between Kiro, Cursor, and Claude Code — one layer above the assistant.**
+**Zero-friction context sync between Kiro, Cursor, and Claude Code.**
 
 [![PyPI](https://img.shields.io/pypi/v/splice-cli)](https://pypi.org/project/splice-cli/)
 [![GitHub](https://img.shields.io/github/stars/hsaenzG/splice?style=social)](https://github.com/hsaenzG/splice)
 
-Splice is a thin meta-tooling layer for **any codebase**. It ingests errors, diffs, and files once, routes to the right agent profile (debugger, architect, implementer), and hands off a reduced context bundle between IDEs via a shared session in your repo.
+Splice is an invisible meta-tooling layer for **any codebase**. Install once, then forget about it. It silently tracks context as you work, syncs it across IDEs and machines via git, and ensures every AI assistant has the full picture — without you ever copy-pasting an error log again.
 
-**Three orchestration modes:** mock (offline) · **Ollama (local, privacy-first)** · Bedrock (cloud).  
-No AWS required for IDE hooks.
+**Three orchestration modes:** mock (offline) · **Ollama (local, privacy-first)** · Bedrock (cloud).
 
 ---
 
-## Install
+## Install (one time)
 
 ```bash
 pip install splice-cli
-```
-
-Then set up your project:
-
-```bash
 cd your-project
-splice setup        # detects installed IDEs and copies hooks automatically
-splice doctor       # verify config
+splice setup
 ```
 
-Restart **Kiro**, **Cursor**, and/or **Claude Code**, then:
+That's it. Splice is now active. No commands to remember, no workflow to learn.
 
+---
+
+## How it works
+
+```mermaid
+flowchart TD
+    subgraph "You just work normally"
+        W[Write code in any IDE]
+        W --> P[Every prompt silently tracked]
+        P --> C[Commit your code]
+    end
+
+    subgraph "Splice handles the rest"
+        C -->|pre-commit hook| B[Bundle updated & committed]
+        B -->|git push/pull| S[Synced to any machine]
+        S -->|SessionStart hook| I[Next IDE auto-loads bundle]
+    end
 ```
-/harness debug the failing test in src/auth.ts
-```
+
+| What happens | When | You do |
+|-------------|------|--------|
+| Context accumulated silently | Every prompt you send | Nothing |
+| Bundle regenerated & committed | Every `git commit` | Nothing (pre-commit hook) |
+| Bundle synced to other machines | `git push` / `git pull` | What you already do |
+| Next IDE loads full context | Open IDE or start session | Nothing (auto-injected) |
 
 ---
 
@@ -48,200 +63,119 @@ Restart **Kiro**, **Cursor**, and/or **Claude Code**, then:
 
 If you use **Kiro**, **Cursor**, and/or **Claude Code** on the same project, you probably:
 
-- Paste the same error log twice
-- Lose session continuity when switching IDEs
-- Burn tokens on README noise and unrelated files
-- Worry about sending proprietary code to cloud orchestrators
+- Paste the same error log in two IDEs
+- Lose session continuity when switching tools
+- Burn tokens sending irrelevant files to the model
+- Context-switch between machines and lose everything
 
-Splice fixes that with a single trigger: **`/harness`**
+Splice fixes all of this **without changing your workflow**.
 
-| Metric | Target | Validated |
-|--------|--------|-----------|
-| Context reduction | ≥ 30% | ~44–67% (mock) · **~96% (Ollama + llama3.2)** |
-| Orchestration latency | p95 < 3s | ~0 ms (mock) · ~7s (Ollama local) |
-| Privacy | Code stays local | ✅ mock + Ollama — no cloud orchestration |
-
----
-
-## Quick start (without pip)
-
-```bash
-git clone https://github.com/hsaenzG/splice.git /tmp/splice
-bash /tmp/splice/scripts/install-splice.sh /path/to/your-repo
-```
+| Metric | Result |
+|--------|--------|
+| Context reduction | ~44–67% (mock) · **~96% (Ollama)** |
+| Orchestration latency | ~0 ms (mock) · ~7s (Ollama) |
+| Commands to remember | **Zero** after setup |
+| Privacy | Code stays local with mock + Ollama |
 
 ---
 
-## Privacy-first: Ollama (recommended for local work)
+## Privacy-first: Ollama (recommended)
 
-Your orchestration code and context **never leave your machine**:
+Your code and context **never leave your machine**:
 
 ```bash
-brew install ollama          # or https://ollama.com
-brew services start ollama
+brew install ollama
 ollama pull llama3.2
 ```
 
-Edit `.splice/config.json`:
+Edit `.splice/config.json` (created by `splice setup`):
 
 ```json
 { "orchestrator": "ollama", "ollama": { "model": "llama3.2" } }
 ```
 
-```bash
-splice doctor
-/harness debug my issue        # in Kiro, Cursor, or Claude Code
-```
-
 | Mode | Code leaves machine? | Cost |
 |------|---------------------|------|
-| **mock** | No — rules only | Free |
+| **mock** | No — rule-based routing | Free |
 | **ollama** | No — localhost LLM | Free |
 | **bedrock** | Yes — AWS | Pay per token |
 
-> Kiro/Cursor/Claude Code may still use their own cloud models when you chat. Splice controls only the **orchestration** step.
+> Kiro/Cursor/Claude Code still use their own cloud models for chat. Splice controls only the **orchestration** (routing + context reduction).
 
 ---
 
-## Daily workflow
+## Optional power-user commands
+
+Splice works automatically, but these are available if you want manual control:
 
 ```bash
-# 1. Capture test/build output (optional)
-npm test 2>&1 | splice capture-error
-
-# 2. Triage in Kiro or Claude Code
-/harness debug the auth failure
-
-# 3. Implement in Cursor or Claude Code (same repo — shared .splice/session.json)
-/harness apply the fix using the orchestrated bundle
-
-# 4. Inspect bundle + metrics
-splice status
-cat .splice/active-bundle.md
+splice status                    # show active session
+splice doctor                    # verify orchestrator health
+splice capture-error             # pipe test output: npm test 2>&1 | splice capture-error
+/harness <task>                  # explicitly request bundle in any IDE prompt
 ```
 
 ---
 
-## How it works
+## What gets committed
 
-```mermaid
-flowchart LR
-    subgraph IDEs
-        K[Kiro]
-        C[Cursor]
-        CC[Claude Code]
-    end
+Splice adds one file to your repo:
 
-    subgraph SpliceLayer["Splice"]
-        I[Ingest] --> O{Orchestrator}
-        O -->|mock| B[Bundle]
-        O -->|ollama| B
-        O -->|bedrock| B
-    end
-
-    S[(.splice/)]
-
-    K -->|/harness| I
-    C -->|/harness| I
-    CC -->|/harness| I
-    O --> S
-    B --> K
-    B --> C
-    B --> CC
+```
+.splice/active-bundle.md    ← committed (synced via git)
+.splice/session.json        ← gitignored (local only)
+.splice/last-error.log      ← gitignored (local only)
 ```
 
-| Component | Role |
-|-----------|------|
-| **Kiro hook** | `UserPromptSubmit` → stdout appended to prompt |
-| **Cursor hook** | Writes `active-bundle.md` + rule reads it |
-| **Claude Code hook** | `UserPromptSubmit` + `SessionStart` → `additionalContext` |
-| **CLI** | `setup`, `init`, `orchestrate`, `handoff`, `capture-error`, `doctor`, `status` |
-| **Config** | `.splice/config.json` — per-project capture rules |
-| **Orchestrator** | mock · ollama · bedrock — [ORCHESTRATORS.md](ORCHESTRATORS.md) |
+The bundle is a markdown summary of your current context: errors, relevant files, diffs, and the recommended agent/workflow. It's small, human-readable, and useful for code review too.
 
 ---
 
-## CLI reference
-
-```bash
-splice setup                                   # install IDE hooks into current project
-splice setup /path/to/project --ide kiro       # specific project / specific IDE
-splice init --assistant kiro|cursor|claude     # create or resume a session
-splice orchestrate --assistant kiro --prompt "/harness ..."
-splice handoff --from kiro --to cursor
-splice capture-error                           # pipe stderr/stdout → .splice/last-error.log
-splice doctor                                  # verify mock/ollama/bedrock
-splice status                                  # show active session
-```
-
----
-
-## Choose your orchestrator
-
-| Mode | Best for | Setup |
-|------|----------|-------|
-| **mock** | Default — instant, offline | `"orchestrator": "mock"` |
-| **ollama** | **Privacy — code stays local** | `ollama pull llama3.2` |
-| **bedrock** | Cloud teams / AWS API | `"orchestrator": "bedrock"` |
-
-Env override: `SPLICE_ORCHESTRATOR=ollama`
-
-If Ollama is down, Splice **falls back to mock** automatically.
-
----
-
-## Configure your project
+## Configure (optional)
 
 `.splice/config.json` (created automatically by `splice setup`):
 
 ```json
 {
-  "project": "my-app",
-  "orchestrator": "ollama",
+  "orchestrator": "mock",
   "captureGitDiff": true,
   "includePaths": ["src/**/*.ts"],
   "errorSources": [".splice/last-error.log"],
-  "ollama": { "model": "llama3.2", "baseUrl": "http://localhost:11434" },
-  "bedrock": { "modelId": "amazon.nova-lite-v1:0" },
-  "promptPathPatterns": true
+  "ollama": { "model": "llama3.2" },
+  "bedrock": { "modelId": "amazon.nova-lite-v1:0" }
 }
 ```
 
-| Field | Description |
+| Field | What it does |
 |-------|-------------|
 | `orchestrator` | `mock` · `ollama` · `bedrock` |
-| `includePaths` | Glob patterns on every `/harness` |
-| `errorSources` | Log files as `error` context |
-| `promptPathPatterns` | Auto-detect paths in your prompt |
+| `includePaths` | Always include these files in context |
+| `errorSources` | Log files to read as error context |
+| `captureGitDiff` | Include git diff in context |
 
 ---
 
-## AWS deploy (optional)
+## Supported IDEs
 
-```bash
-chmod +x scripts/deploy.sh && ./scripts/deploy.sh
-```
-
-Stack sets `SPLICE_ORCHESTRATOR=bedrock` on Lambda. Local hooks don't need AWS.
+| IDE | Context tracking | Bundle injection | Status |
+|-----|-----------------|-----------------|--------|
+| **Kiro** | UserPromptSubmit hook | SessionStart hook | ✅ |
+| **Cursor** | beforeSubmitPrompt hook | sessionStart hook | ✅ |
+| **Claude Code** | UserPromptSubmit hook | SessionStart hook | ✅ |
+| Windsurf | — | — | Planned |
+| Zed | — | — | Planned |
 
 ---
 
-## Project structure
+## How context flows
 
 ```
-├── splice_cli/              # pip-installable package
-│   ├── cli.py               # splice entrypoint
-│   ├── shared/              # orchestrator, collect, store, config
-│   └── data/                # hooks + templates bundled with the package
-├── scripts/
-│   ├── install-splice.sh    # legacy bootstrap (pre-pip)
-│   ├── splice-cli.py        # legacy CLI script
-│   └── demo-dual-ide.py
-├── integrations/hooks/      # Kiro + Cursor + Claude Code hook scripts
-├── src/shared/              # same modules for AWS Lambda handlers
-├── ORCHESTRATORS.md
-├── INSTALL.md
-└── demo-app/                # Optional workshop sample
+Machine A (Kiro)          Git repo              Machine B (Cursor)
+─────────────────         ────────              ──────────────────
+Work normally        →    commit includes       →    Open Cursor
+Context tracked           active-bundle.md           Bundle auto-injected
+silently                  push to remote              on SessionStart
+                                                     Full context ready
 ```
 
 ---
@@ -249,9 +183,9 @@ Stack sets `SPLICE_ORCHESTRATOR=bedrock` on Lambda. Local hooks don't need AWS.
 ## Requirements
 
 - Python 3.10+
+- Git
 - [Kiro](https://kiro.dev), [Cursor](https://cursor.com), and/or [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
 - [Ollama](https://ollama.com) (optional, for local LLM orchestration)
-- Git (optional, for diff capture)
 
 ---
 
@@ -259,10 +193,9 @@ Stack sets `SPLICE_ORCHESTRATOR=bedrock` on Lambda. Local hooks don't need AWS.
 
 | Doc | Description |
 |-----|-------------|
-| [ORCHESTRATORS.md](ORCHESTRATORS.md) | mock / Ollama / Bedrock |
+| [ORCHESTRATORS.md](ORCHESTRATORS.md) | mock / Ollama / Bedrock details |
 | [INSTALL.md](INSTALL.md) | Manual install (without pip) |
-| [DEMO_KIRO_CURSOR.md](DEMO_KIRO_CURSOR.md) | Live walkthrough (Kiro, Cursor, Claude Code) |
-| [NEXT_ITERATIONS.md](NEXT_ITERATIONS.md) | Roadmap |
+| [DEMO_KIRO_CURSOR.md](DEMO_KIRO_CURSOR.md) | Live walkthrough |
 
 ---
 
