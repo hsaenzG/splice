@@ -112,6 +112,8 @@ Splice works automatically, but these are available if you want manual control:
 splice status                    # show active session
 splice doctor                    # verify orchestrator health
 splice capture-error             # pipe test output: npm test 2>&1 | splice capture-error
+splice upgrade                   # upgrade to latest version + update hooks
+splice uninstall                 # remove all Splice hooks from current project
 /harness <task>                  # explicitly request bundle in any IDE prompt
 ```
 

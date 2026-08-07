@@ -380,6 +380,134 @@ def cmd_handoff(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_uninstall(args: argparse.Namespace) -> int:
+    """Remove all Splice hooks and config from a project."""
+    target = Path(args.path).resolve()
+    if not target.exists():
+        print(f"Error: path '{target}' does not exist.", file=sys.stderr)
+        return 1
+
+    removed: list[str] = []
+
+    # Remove IDE hook files
+    hook_files = [
+        "integrations/hooks/kiro-orchestrate.sh",
+        "integrations/hooks/kiro-session-init.sh",
+        "integrations/hooks/cursor-orchestrate.sh",
+        "integrations/hooks/cursor-session-init.sh",
+        "integrations/hooks/claude-orchestrate.sh",
+        "integrations/hooks/claude-session-init.sh",
+        "integrations/hooks/orchestrate.sh",
+        ".kiro/hooks/splice.json",
+        ".kiro/steering/splice.md",
+        ".cursor/rules/splice.mdc",
+        ".claude/CLAUDE.md",
+    ]
+    for rel in hook_files:
+        p = target / rel
+        if p.exists():
+            p.unlink()
+            removed.append(rel)
+
+    # Remove .splice directory
+    splice_dir = target / ".splice"
+    if splice_dir.exists():
+        shutil.rmtree(splice_dir)
+        removed.append(".splice/")
+
+    # Remove splice section from git pre-commit hook
+    pre_commit = target / ".git" / "hooks" / "pre-commit"
+    if pre_commit.exists():
+        content = pre_commit.read_text()
+        if "splice" in content.lower():
+            # If the entire file is the splice hook, remove it
+            if content.strip().startswith("#!/usr/bin/env bash\n# Splice pre-commit"):
+                pre_commit.unlink()
+                removed.append(".git/hooks/pre-commit")
+            else:
+                # Remove the appended splice section
+                marker = "# --- Splice pre-commit ---"
+                if marker in content:
+                    content = content[:content.index(marker)].rstrip() + "\n"
+                    pre_commit.write_text(content)
+                    removed.append(".git/hooks/pre-commit (splice section removed)")
+
+    # Clean .gitignore
+    gitignore = target / ".gitignore"
+    if gitignore.exists():
+        content = gitignore.read_text()
+        if "# splice" in content:
+            lines = content.split("\n")
+            new_lines = []
+            skip = False
+            for line in lines:
+                if line.strip() == "# splice":
+                    skip = True
+                    continue
+                if skip and line.strip() == "":
+                    skip = False
+                    continue
+                if skip and line.startswith(".splice/"):
+                    continue
+                skip = False
+                new_lines.append(line)
+            gitignore.write_text("\n".join(new_lines))
+            removed.append(".gitignore (splice entries removed)")
+
+    # Remove empty integrations/hooks directory
+    hooks_dir = target / "integrations" / "hooks"
+    if hooks_dir.exists() and not any(hooks_dir.iterdir()):
+        hooks_dir.rmdir()
+        integrations_dir = target / "integrations"
+        if integrations_dir.exists() and not any(integrations_dir.iterdir()):
+            integrations_dir.rmdir()
+        removed.append("integrations/hooks/ (empty dir)")
+
+    if removed:
+        print("Removed:")
+        for f in removed:
+            print(f"  - {f}")
+        print("\nSplice uninstalled. To also remove the CLI: pip uninstall splice-cli")
+    else:
+        print("Nothing to remove — Splice not found in this project.")
+
+    return 0
+
+
+def cmd_upgrade(_: argparse.Namespace) -> int:
+    """Upgrade splice-cli to the latest version and re-run setup."""
+    import subprocess
+
+    print("Upgrading splice-cli...")
+    result = subprocess.run(
+        [sys.executable, "-m", "pip", "install", "--upgrade", "splice-cli"],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        print(f"Error upgrading: {result.stderr}", file=sys.stderr)
+        return 1
+
+    # Show new version
+    for line in result.stdout.split("\n"):
+        if "Successfully installed" in line or "already satisfied" in line.lower():
+            print(f"  {line.strip()}")
+            break
+
+    # Re-run setup to update hooks
+    print("\nUpdating hooks in current project...")
+    setup_result = subprocess.run(
+        ["splice", "setup", ".", "--force"],
+        capture_output=True, text=True,
+    )
+    if setup_result.returncode == 0:
+        print("  Hooks updated.")
+    else:
+        print("  Note: run 'splice setup --force' manually to update hooks.")
+
+    print("\nDone.")
+    return 0
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -433,7 +561,7 @@ def main() -> int:
         prog="splice",
         description="Splice — shared context layer for Kiro, Cursor, and Claude Code",
     )
-    parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
+    parser.add_argument("--version", action="version", version="%(prog)s 0.1.3")
     sub = parser.add_subparsers(dest="command", required=True)
 
     # setup — install hooks into a project
@@ -499,6 +627,20 @@ def main() -> int:
     p_handoff.add_argument("--to", dest="to_assistant", required=True, choices=["cursor", "kiro", "claude"])
     p_handoff.add_argument("--prompt", default=None)
     p_handoff.set_defaults(func=cmd_handoff)
+
+    # uninstall
+    p_uninstall = sub.add_parser("uninstall", help="Remove Splice hooks and config from a project")
+    p_uninstall.add_argument(
+        "path",
+        nargs="?",
+        default=".",
+        help="Target project directory (default: current directory)",
+    )
+    p_uninstall.set_defaults(func=cmd_uninstall)
+
+    # upgrade
+    p_upgrade = sub.add_parser("upgrade", help="Upgrade splice-cli and update hooks")
+    p_upgrade.set_defaults(func=cmd_upgrade)
 
     args = parser.parse_args()
     return args.func(args)
