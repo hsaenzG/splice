@@ -1,0 +1,44 @@
+name: Issue reviewer
+
+# Fires when someone opens a new issue. The agent reads it, searches, and
+# leaves a comment with suggested labels. It runs on its own, no laptop needed.
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write        # to post the comment
+  contents: read       # the agent reads repo code, nothing more
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the agent
+        run: pip install -r examples/issue-reviewer/requirements.txt
+
+      - name: Review the issue
+        id: review
+        env:
+          # Bedrock credentials come from GitHub secrets.
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          python examples/issue-reviewer/agent.py > comment.md
+          cat comment.md
+
+      - name: Post the comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh issue comment "${{ github.event.issue.number }}" --body-file comment.md
