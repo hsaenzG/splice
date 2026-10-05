@@ -28,10 +28,12 @@ jobs:
       - name: Review the issue
         id: review
         env:
-          # Bedrock credentials come from GitHub secrets.
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          # The agent runs on model="openai/...", so the harness reads the key
+          # from OPENAI_API_KEY. Store it as a repo secret (Settings > Secrets
+          # and variables > Actions). The native web_search tool bills through
+          # this key. To run on Bedrock instead, switch the model in agent.py
+          # and swap this for AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / AWS_REGION.
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
