@@ -1,0 +1,5 @@
+# Local run artifacts — not part of the example.
+.env
+.venv/
+.agent/
+comment.md

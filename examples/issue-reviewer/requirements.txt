@@ -1,0 +1,5 @@
+strands-harness
+# The OpenAI provider is a separate package. The harness needs it because the
+# agent runs on model="openai/..."; without it, resolve_model raises
+# PackageNotFoundError for "openai".
+openai
