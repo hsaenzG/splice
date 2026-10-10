@@ -19,6 +19,8 @@ Splice is an invisible meta-tooling layer for **any codebase**. Install once, th
 
 **Three orchestration modes:** mock (offline) · **Ollama (local, privacy-first)** · Bedrock (cloud).
 
+> **Note:** this project was created for educational purposes, as an exploration of how to keep context in sync across different agentic IDEs (Kiro, Cursor, Claude Code).
+
 ---
 
 ## Install (one time)
